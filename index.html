@@ -3,293 +3,506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="DevCafe Menu - Your favorite drinks at FSKTM.">
     <title>DevCafe Menu</title>
+    
+    <!-- Google Fonts: Poppins for a friendly cafe vibe -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-main: #e0e0e0;
-            --accent: #d4a373; 
-            --price-hot: #ff7e67;
-            --price-cold: #67b7ff;
-            --btn-color: #43E660; 
+            /* Warm Light Theme */
+            --bg-color: #fcf9f2;
+            --bg-gradient: radial-gradient(circle at 10% 0%, #fff7e6 0%, #fcf9f2 50%);
+            --text-main: #3d2c23;
+            --text-muted: #857369;
+            --accent: #d37c4d; /* Warm terracotta/caramel */
+            --card-bg: #ffffff;
+            --price-hot: #e06d53;
+            --price-cold: #5398e0;
+            --btn-color: #38b000; 
+            --btn-gradient: linear-gradient(135deg, #38b000, #008000);
+            --shadow-sm: 0 4px 15px rgba(61, 44, 35, 0.05);
+            --shadow-md: 0 10px 30px rgba(61, 44, 35, 0.08);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
 
         body {
             background-color: var(--bg-color);
+            background-image: var(--bg-gradient);
             color: var(--text-main);
-            padding-bottom: 90px; 
+            padding-bottom: 120px; 
+            min-height: 100vh;
         }
 
         header {
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');
-            background-size: cover;
-            background-position: center;
+            position: relative;
             text-align: center;
-            padding: 40px 20px;
-            border-bottom: 4px solid var(--accent);
+            padding: 70px 20px 50px;
+            overflow: hidden;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        /* Bright cafe header image */
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(255, 245, 235, 0.7), rgba(252, 249, 242, 1)), 
+                        url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80');
+            background-size: cover;
+            background-position: center 30%;
+            z-index: -1;
         }
 
         h1 {
-            font-size: 2.5rem;
-            color: var(--accent);
-            letter-spacing: 2px;
+            font-size: 3.5rem;
+            color: var(--text-main);
+            letter-spacing: -1.5px;
             margin-bottom: 5px;
+            font-weight: 800;
+        }
+        
+        h1 span {
+            color: var(--accent);
         }
 
         p.location {
-            font-size: 1rem;
-            color: #aaa;
-            font-weight: 300;
-            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 30px;
         }
 
         .opening-hours {
-            display: inline-block;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid var(--accent);
-            padding: 10px 25px;
+            display: inline-flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(211, 124, 77, 0.2);
+            padding: 12px 30px;
             border-radius: 50px;
-            backdrop-filter: blur(4px);
+            box-shadow: var(--shadow-sm);
+            transform: translateY(0);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .opening-hours:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+            box-shadow: var(--shadow-md);
         }
 
         .hours-label {
-            display: block;
             font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--accent);
-            font-weight: bold;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            font-weight: 700;
             margin-bottom: 2px;
         }
 
         .hours-time {
-            font-size: 0.95rem;
-            color: #fff;
-            font-weight: 500;
+            font-size: 1.05rem;
+            color: var(--accent);
+            font-weight: 600;
         }
 
         .container {
-            max-width: 600px;
-            margin: 0 auto;
+            max-width: 650px;
+            margin: -20px auto 0; /* overlap header slightly */
             padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .category-section {
+            margin-top: 35px;
+            animation: fadeUp 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
         }
 
         .category-title {
-            margin-top: 30px;
-            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+        
+        .category-title-icon {
             font-size: 1.5rem;
-            border-left: 5px solid var(--accent);
-            padding-left: 10px;
-            text-transform: uppercase;
+            background: var(--card-bg);
+            box-shadow: var(--shadow-sm);
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            color: var(--accent);
         }
 
         .price-header {
             display: flex;
             justify-content: flex-end;
-            margin-bottom: 5px;
+            margin-bottom: 12px;
             font-size: 0.8rem;
-            color: #888;
-            padding-right: 15px;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding-right: 20px;
+            letter-spacing: 1px;
         }
+        
         .price-header span {
-            width: 50px;
+            width: 60px;
             text-align: center;
         }
 
         .menu-item {
-            background-color: var(--card-bg);
-            margin-bottom: 10px;
-            padding: 15px;
-            border-radius: 12px;
+            background: var(--card-bg);
+            margin-bottom: 15px;
+            padding: 18px 22px;
+            border-radius: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: var(--shadow-sm);
+            border: 2px solid transparent;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .menu-item:hover {
+            transform: scale(1.02) translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(211, 124, 77, 0.15); /* accent border on hover */
         }
 
         .item-name {
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             flex-grow: 1;
+            margin: 0;
+            color: var(--text-main);
         }
 
         .prices {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
 
         .price-tag {
-            width: 50px;
+            width: 60px;
             text-align: center;
-            font-weight: bold;
-            font-size: 1rem;
+            font-weight: 700;
+            font-size: 1.05rem;
+            background: #f5f2eb;
+            padding: 6px 0;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .menu-item:hover .price-tag {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
         .hot { color: var(--price-hot); }
         .cold { color: var(--price-cold); }
-        .single-price { color: var(--accent); width: auto; padding-left: 10px; }
+        .single-price { 
+            color: var(--accent); 
+            width: auto; 
+            padding: 6px 16px; 
+        }
 
         .order-btn {
             position: fixed;
-            bottom: 25px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: var(--btn-color);
-            color: #000;
-            padding: 15px 40px;
+            background: var(--btn-gradient);
+            color: #fff;
+            padding: 18px 50px;
             border-radius: 50px;
             text-decoration: none;
-            font-weight: 800;
+            font-weight: 700;
             font-size: 1.2rem;
-            box-shadow: 0 4px 15px rgba(67, 230, 96, 0.4);
+            letter-spacing: 0.5px;
+            box-shadow: 0 10px 25px rgba(56, 176, 0, 0.3);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             z-index: 100;
             width: 90%;
-            max-width: 400px;
+            max-width: 380px;
             justify-content: center;
-            transition: transform 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
         }
 
         .order-btn:hover {
-            transform: translateX(-50%) scale(1.05);
-            background-color: #36b64d;
+            transform: translateX(-50%) translateY(-5px);
+            box-shadow: 0 15px 35px rgba(56, 176, 0, 0.4);
+            background: linear-gradient(135deg, #42cc00, #009900);
+        }
+        
+        .order-btn:focus-visible {
+            outline: 4px solid rgba(56, 176, 0, 0.4);
+            outline-offset: 2px;
         }
         
         .order-btn svg {
             stroke-width: 2.5;
+            transition: transform 0.3s ease;
         }
 
+        .order-btn:hover svg {
+            transform: translateX(5px) translateY(-5px);
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Staggered animation delays for sections */
+        .category-section:nth-child(1) { animation-delay: 0.1s; }
+        .category-section:nth-child(2) { animation-delay: 0.2s; }
+        .category-section:nth-child(3) { animation-delay: 0.3s; }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 2.8rem; }
+            .menu-item { padding: 16px 18px; }
+            .item-name { font-size: 1.05rem; }
+            .price-tag { width: 55px; font-size: 1rem; }
+            header { padding: 50px 20px 40px; }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>DevCafe Menu</h1>
+        <h1>DevCafe <span>Menu</span></h1>
         <p class="location">Bilik Bacaan FSKTM Lvl 1</p>
         
         <div class="opening-hours">
             <span class="hours-label">We Are Open Today</span>
-            <span class="hours-time" id="dynamic-schedule">Loading...</span>
+            <span class="hours-time" id="dynamic-schedule">Loading schedule...</span>
         </div>
     </header>
 
-    <div class="container">
-        
-        <h2 class="category-title">Coffee</h2>
-        <div class="price-header">
-            <span>HOT</span>
-            <span>COLD</span>
-        </div>
+    <main class="container" id="menu-container">
+        <!-- Menu sections will be injected here by JavaScript -->
+    </main>
 
-        <div class="menu-item">
-            <div class="item-name">Americano</div>
-            <div class="prices"><span class="price-tag hot">RM 6</span><span class="price-tag cold">RM 7</span></div>
-        </div>
-        <div class="menu-item">
-            <div class="item-name">Latte</div>
-            <div class="prices"><span class="price-tag hot">RM 7</span><span class="price-tag cold">RM 8</span></div>
-        </div>
-        <div class="menu-item">
-            <div class="item-name">Cappuccino</div>
-            <div class="prices"><span class="price-tag hot">RM 7</span><span class="price-tag cold">RM 8</span></div>
-        </div>
-        <div class="menu-item">
-            <div class="item-name">Mocha</div>
-            <div class="prices"><span class="price-tag hot">RM 8</span><span class="price-tag cold">RM 9</span></div>
-        </div>
-        <div class="menu-item">
-            <div class="item-name">Caramel</div>
-            <div class="prices"><span class="price-tag hot">RM 8</span><span class="price-tag cold">RM 9</span></div>
-        </div>
-        <div class="menu-item">
-            <div class="item-name">Vanilla</div>
-            <div class="prices"><span class="price-tag hot">RM 8</span><span class="price-tag cold">RM 9</span></div>
-        </div>
-
-        <h2 class="category-title">Non-Coffee</h2>
-        <div class="price-header">
-            <span>HOT</span>
-            <span>COLD</span>
-        </div>
-
-        <div class="menu-item">
-            <div class="item-name">Chocolate</div>
-            <div class="prices"><span class="price-tag hot">RM 7</span><span class="price-tag cold">RM 8</span></div>
-        </div>
-        <div class="menu-item">
-            <div class="item-name">Matcha Latte</div>
-            <div class="prices"><span class="price-tag hot">RM 7</span><span class="price-tag cold">RM 8</span></div>
-        </div>
-        <div class="menu-item">
-            <div class="item-name">Matcha Strawberry</div>
-            <div class="prices"><span class="price-tag hot">RM 10</span><span class="price-tag cold">RM 11</span></div>
-        </div>
-        <div class="menu-item">
-            <div class="item-name">Biscoff Milk</div>
-            <div class="prices"><span class="price-tag hot">RM 10</span><span class="price-tag cold">RM 11</span></div>
-        </div>
-        <div class="menu-item">
-            <div class="item-name">Strawberry Milk</div>
-            <div class="prices"><span class="price-tag hot">RM 8</span><span class="price-tag cold">RM 9</span></div>
-        </div>
-
-        <h2 class="category-title">Refreshers</h2>
-        
-        <div class="menu-item">
-            <div class="item-name">Blue Lemon</div>
-            <div class="prices"><span class="price-tag single-price">RM 5</span></div>
-        </div>
-        <div class="menu-item">
-            <div class="item-name">Honey Lemon</div>
-            <div class="prices"><span class="price-tag single-price">RM 5</span></div>
-        </div>
-
-    </div>
-
-    <a href="https://linktr.ee/coremindhub" class="order-btn" target="_blank">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+    <a href="#" class="order-btn" target="_blank" aria-label="Order Now">
         ORDER NOW
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
     </a>
 
     <script>
+        // --- DATA LAYER: Easy to update menu items here ---
+        const menuData = [
+            {
+                category: "Coffee",
+                icon: "☕",
+                hasHotCold: true,
+                items: [
+                    { name: "Americano", hot: "6", cold: "7" },
+                    { name: "Latte", hot: "7", cold: "8" },
+                    { name: "Cappuccino", hot: "7", cold: "8" },
+                    { name: "Mocha", hot: "8", cold: "9" },
+                    { name: "Caramel Latte", hot: "8", cold: "9" },
+                    { name: "Spanish Latte", hot: "8", cold: "9" },
+                    { name: "Biscoff Latte", hot: "10", cold: "11" }
+                ]
+            },
+            {
+                category: "Non-Coffee",
+                icon: "🥛",
+                hasHotCold: true,
+                items: [
+                    { name: "Chocolate", hot: "7", cold: "8" },
+                    { name: "Matcha Latte", hot: "7", cold: "8" },
+                    { name: "Matcha Strawberry", hot: "10", cold: "11" },
+                    { name: "Biscoff Milk", hot: "10", cold: "11" },
+                    { name: "Strawberry Milk", hot: "8", cold: "9" }
+                ]
+            },
+            {
+                category: "Refreshers",
+                icon: "🧊",
+                hasHotCold: false,
+                items: [
+                    { name: "Blue Lemon", single: "5" },
+                    { name: "Honey Lemon", single: "5" },
+                    { name: "Apple", single: "5" }
+                ]
+            }
+        ];
+
         // --- EDIT YOUR SCHEDULE HERE ---
         const weeklySchedule = {
             "Sunday":    "Closed",
-            "Monday":    "8:00 AM - 6:00 PM",
-            "Tuesday":   "8:00 AM - 6:00 PM",
-            "Wednesday": "8:00 AM - 6:00 PM",
-            "Thursday":  "8:00 AM - 6:00 PM",
-            "Friday":    "8:00 AM - 6:00 PM", 
+            "Monday":    "8:00 AM - 4:00 PM",
+            "Tuesday":   "8:00 AM - 4:00 PM",
+            "Wednesday": "8:00 AM - 4:00 PM",
+            "Thursday":  "8:00 AM - 4:00 PM",
+            "Friday":    "Closed", 
             "Saturday":  "Closed"
         };
         // -------------------------------
+
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            let htmlContent = '';
+
+            menuData.forEach(section => {
+                let sectionHtml = `
+                    <section class="category-section">
+                        <h2 class="category-title">
+                            <span class="category-title-icon">${section.icon}</span>
+                            ${section.category}
+                        </h2>
+                `;
+
+                if (section.hasHotCold) {
+                    sectionHtml += `
+                        <div class="price-header">
+                            <span>HOT</span>
+                            <span>COLD</span>
+                        </div>
+                    `;
+                }
+
+                section.items.forEach(item => {
+                    let pricesHtml = '';
+                    if (section.hasHotCold) {
+                        pricesHtml = `
+                            <div class="prices">
+                                <span class="price-tag hot">RM ${item.hot}</span>
+                                <span class="price-tag cold">RM ${item.cold}</span>
+                            </div>
+                        `;
+                    } else {
+                        pricesHtml = `
+                            <div class="prices">
+                                <span class="price-tag single-price">RM ${item.single}</span>
+                            </div>
+                        `;
+                    }
+
+                    sectionHtml += `
+                        <article class="menu-item">
+                            <h3 class="item-name">${item.name}</h3>
+                            ${pricesHtml}
+                        </article>
+                    `;
+                });
+
+                sectionHtml += `</section>`;
+                htmlContent += sectionHtml;
+            });
+
+            container.innerHTML = htmlContent;
+        }
+
+        function updateOrderLink() {
+            const today = new Date();
+            const day = today.getDay(); // 0=Sun, 1=Mon, ..., 4=Thu
+            const hour = today.getHours();
+            
+            const orderBtn = document.querySelector('.order-btn');
+            
+            // Check if within operating hours (Mon-Thurs, 8 AM to 4 PM)
+            if (day >= 1 && day <= 4 && hour >= 8 && hour < 16) {
+                let link = "";
+                
+                if (day === 1) { // Monday
+                    link = (hour < 12) ? "https://wa.link/vfbi39" : "https://wa.link/zpc3dh";
+                } else if (day === 2) { // Tuesday
+                    link = (hour < 12) ? "https://wa.link/zpc3dh" : "https://wa.link/vfbi39";
+                } else if (day === 3) { // Wednesday
+                    link = "https://wa.link/tfoem1"; // Full day
+                } else if (day === 4) { // Thursday
+                    link = (hour < 12) ? "https://wa.link/vfbi39" : "https://wa.link/zpc3dh";
+                }
+                
+                orderBtn.href = link;
+                orderBtn.style.opacity = "1";
+                orderBtn.style.pointerEvents = "auto";
+                orderBtn.style.background = "var(--btn-gradient)";
+                orderBtn.innerHTML = `
+                    ORDER NOW
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                `;
+            } else {
+                // Closed state
+                orderBtn.href = "#";
+                orderBtn.innerHTML = `CURRENTLY CLOSED`;
+                orderBtn.style.opacity = "0.7";
+                orderBtn.style.pointerEvents = "none";
+                orderBtn.style.background = "linear-gradient(135deg, #a0a0a0, #737373)";
+                orderBtn.style.color = "#ffffff";
+                orderBtn.style.boxShadow = "none";
+            }
+        }
 
         function updateSchedule() {
             const today = new Date();
             const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
             const dayName = days[today.getDay()];
-            const dateString = today.getDate() + "/" + (today.getMonth() + 1) + "/" + today.getFullYear();
+            
+            // Format date as DD/MM/YYYY
+            const d = today.getDate().toString().padStart(2, '0');
+            const m = (today.getMonth() + 1).toString().padStart(2, '0');
+            const y = today.getFullYear();
+            const dateString = `${d}/${m}/${y}`;
+            
             const hours = weeklySchedule[dayName];
             const displayElement = document.getElementById("dynamic-schedule");
             
             if (hours === "Closed") {
-                displayElement.innerHTML = `${dayName} (${dateString}) &bull; <span style="color:#ff7e67">CLOSED</span>`;
+                displayElement.innerHTML = `${dayName} (${dateString}) &bull; <span style="color:var(--price-hot)">CLOSED</span>`;
             } else {
                 displayElement.innerHTML = `${dayName} (${dateString}) &bull; ${hours}`;
             }
         }
-        updateSchedule();
-    </script>
 
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMenu();
+            updateSchedule();
+            updateOrderLink();
+        });
+    </script>
 </body>
 </html>
