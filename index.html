@@ -285,6 +285,14 @@
         .cart-info {
             display: flex;
             flex-direction: column;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        
+        .cart-info:hover {
+            background: rgba(0,0,0,0.03);
         }
 
         .cart-total {
@@ -323,6 +331,142 @@
 
         .checkout-btn:active {
             transform: translateY(0);
+        }
+
+        /* Cart Details Panel (Slide up) */
+        .cart-details-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 90; /* below cart-bar */
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(3px);
+        }
+
+        .cart-details-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .cart-details-panel {
+            position: fixed;
+            bottom: 80px; /* sit just above the cart bar */
+            left: 50%;
+            transform: translateX(-50%) translateY(150%);
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+            z-index: 95;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 50vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-details-panel.active {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .cart-details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .cart-details-header h3 {
+            font-size: 1.3rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .close-cart-btn {
+            background: #f5f5f5;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        
+        .close-cart-btn:hover { background: #e0e0e0; color: #000; }
+
+        .cart-items-list {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 5px;
+        }
+
+        .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .cart-item-info {
+            flex-grow: 1;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 1.05rem;
+        }
+
+        .cart-item-price {
+            font-size: 0.9rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #fcf9f2;
+            padding: 5px;
+            border-radius: 50px;
+        }
+
+        .qty-btn {
+            background: #fff;
+            border: 1px solid #eee;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-weight: bold;
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .qty-btn:hover { background: #eee; }
+        .qty-btn:active { transform: scale(0.9); }
+
+        .qty-value {
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
+            font-size: 1rem;
         }
 
         /* Toast Notification */
@@ -441,7 +585,7 @@
         }
 
         #delivery-fields {
-            display: none; /* hidden by default */
+            display: none;
             margin-top: 15px;
         }
 
@@ -508,6 +652,7 @@
             .cart-bar { padding: 15px 20px; }
             .checkout-btn { padding: 12px 25px; }
             .modal-box { padding: 20px; }
+            .cart-details-panel { padding: 20px; width: 95%; bottom: 75px; }
         }
     </style>
 </head>
@@ -538,10 +683,23 @@
         </div>
     </main>
 
+    <!-- Cart Details Overlay & Panel -->
+    <div class="cart-details-overlay" id="cart-details-overlay" onclick="toggleCartDetails()"></div>
+    <div class="cart-details-panel" id="cart-details-panel">
+        <div class="cart-details-header">
+            <h3>Your Cart</h3>
+            <button class="close-cart-btn" onclick="toggleCartDetails()">✕</button>
+        </div>
+        <div class="cart-items-list" id="cart-items-list">
+            <!-- Items injected here by JS -->
+        </div>
+    </div>
+
+    <!-- Floating Cart Bar -->
     <div class="cart-bar" id="cart-bar">
-        <div class="cart-info">
+        <div class="cart-info" onclick="toggleCartDetails()" title="View Cart Details">
             <span class="cart-total" id="cart-total">RM 0.00</span>
-            <span class="cart-items-count" id="cart-qty">0 items</span>
+            <span class="cart-items-count"><span id="cart-qty">0 items</span> ⌃</span>
         </div>
         <button class="checkout-btn" onclick="openModal()">
             Checkout
@@ -651,19 +809,15 @@
             const numB = "60163605017";
             const numC = "601151255671";
 
-            // Normal logic
-            // if (day >= 1 && day <= 4 && hour >= 8 && hour < 16) {
-            
             // ALLOW ALL FOR TESTING (Temporary logic based on user test)
             if (true) { 
                 if (day === 1) return (hour < 12) ? numA : numB;
                 if (day === 2) return (hour < 12) ? numB : numA;
                 if (day === 3) return numC;
                 if (day === 4) return (hour < 12) ? numA : numB;
-                // Default fallback for weekend tests
                 return numA;
             }
-            return null; // Closed
+            return null;
         }
 
         function addToCart(name, variant, price) {
@@ -680,7 +834,27 @@
             }
             
             updateCartUI();
+            if (document.getElementById('cart-details-panel').classList.contains('active')) {
+                renderCartItems();
+            }
             showToast(`${name} (${variant}) added!`);
+        }
+
+        function updateItemQty(key, delta) {
+            if (cart[key]) {
+                cart[key].qty += delta;
+                if (cart[key].qty <= 0) {
+                    delete cart[key];
+                }
+                updateCartUI();
+                renderCartItems();
+                
+                // If cart is empty, close the panel
+                if (Object.keys(cart).length === 0) {
+                    document.getElementById('cart-details-overlay').classList.remove('active');
+                    document.getElementById('cart-details-panel').classList.remove('active');
+                }
+            }
         }
 
         function showToast(message) {
@@ -711,7 +885,39 @@
                 document.getElementById('cart-total').innerText = `RM ${totalPrice.toFixed(2)}`;
             } else {
                 cartBar.classList.remove('active');
+                document.getElementById('cart-details-overlay').classList.remove('active');
+                document.getElementById('cart-details-panel').classList.remove('active');
             }
+        }
+
+        function toggleCartDetails() {
+            if (Object.keys(cart).length === 0) return;
+            document.getElementById('cart-details-overlay').classList.toggle('active');
+            document.getElementById('cart-details-panel').classList.toggle('active');
+            renderCartItems();
+        }
+
+        function renderCartItems() {
+            const list = document.getElementById('cart-items-list');
+            let html = '';
+            
+            for (const key in cart) {
+                const item = cart[key];
+                html += `
+                    <div class="cart-item-row">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.name} <span style="font-weight:400; font-size:0.9rem; color:#857369">(${item.variant})</span></div>
+                            <div class="cart-item-price">RM ${(item.price * item.qty).toFixed(2)}</div>
+                        </div>
+                        <div class="cart-item-controls">
+                            <button class="qty-btn" onclick="updateItemQty('${key}', -1)">-</button>
+                            <span class="qty-value">${item.qty}</span>
+                            <button class="qty-btn" onclick="updateItemQty('${key}', 1)">+</button>
+                        </div>
+                    </div>
+                `;
+            }
+            list.innerHTML = html;
         }
 
         // --- MODAL LOGIC ---
@@ -726,6 +932,11 @@
                 alert("Sorry, we are currently closed!");
                 return;
             }
+            
+            // Close cart details if open
+            document.getElementById('cart-details-overlay').classList.remove('active');
+            document.getElementById('cart-details-panel').classList.remove('active');
+            
             document.getElementById('checkout-modal').classList.add('active');
         }
 
@@ -849,8 +1060,6 @@
             const y = today.getFullYear();
             const dateString = `${d}/${m}/${y}`;
             
-            // To make sure UI shows closed if outside hours, 
-            // even though I bypassed getDutyNumber for testing
             const hour = today.getHours();
             const day = today.getDay(); 
             let hours = weeklySchedule[dayName];
@@ -858,8 +1067,7 @@
             if (day >= 1 && day <= 4 && hour >= 8 && hour < 16) {
                 // it's open
             } else {
-                // testing fallback
-                hours = "8:00 AM - 4:00 PM"; 
+                hours = "8:00 AM - 4:00 PM"; // For testing
             }
 
             const displayElement = document.getElementById("dynamic-schedule");
