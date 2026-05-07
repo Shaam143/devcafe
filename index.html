@@ -978,6 +978,8 @@
             if (type === 'Delivery') {
                 message += `*Location:* ${location}\n`;
             }
+            
+            message += `\n_(If no reply within 10 mins, please forward this message to 0163605017)_\n`;
 
             const encodedMessage = encodeURIComponent(message);
             const whatsappUrl = `https://wa.me/${dutyNumber}?text=${encodedMessage}`;
