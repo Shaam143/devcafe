@@ -806,27 +806,52 @@
         };
 
         // --- ADMIN / OVERRIDE ---
+        let globalSettings = { override_number: null };
+
+        async function fetchSettings() {
+            try {
+                const response = await fetch('settings.php');
+                const data = await response.json();
+                globalSettings.override_number = data.override_number;
+                updateSchedule();
+            } catch (e) {
+                console.error("Failed to load global settings:", e);
+            }
+        }
+
+        // Fetch initially and check every 10 seconds
+        fetchSettings();
+        setInterval(fetchSettings, 10000);
+
         let titleClickCount = 0;
         let titleClickTimer;
 
-        function handleTitleClick() {
+        async function handleTitleClick() {
             titleClickCount++;
             clearTimeout(titleClickTimer);
             
             if (titleClickCount >= 5) {
                 titleClickCount = 0;
-                const currentOverride = localStorage.getItem('devcafe_override_number') || '';
+                const currentOverride = globalSettings.override_number || '';
                 const newNumber = prompt("Admin: Enter override WhatsApp number (include country code, e.g., 60123456789). Leave empty to clear.", currentOverride);
                 
                 if (newNumber !== null) {
-                    if (newNumber.trim() === '') {
-                        localStorage.removeItem('devcafe_override_number');
-                        alert("Override cleared. Using default schedule.");
-                    } else {
-                        localStorage.setItem('devcafe_override_number', newNumber.trim());
-                        alert("Override set to: " + newNumber.trim());
+                    const valToSave = newNumber.trim() === '' ? null : newNumber.trim();
+                    try {
+                        const response = await fetch('settings.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ override_number: valToSave })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            globalSettings.override_number = data.override_number;
+                            alert(valToSave ? "Global override set to: " + valToSave : "Global override cleared. Using default schedule.");
+                            updateSchedule();
+                        }
+                    } catch (e) {
+                        alert("Failed to save settings. Please ensure you are running on a PHP server.");
                     }
-                    updateSchedule();
                 }
             } else {
                 titleClickTimer = setTimeout(() => {
@@ -840,7 +865,7 @@
         let toastTimeout;
 
         function getDutyNumber() {
-            const overrideNumber = localStorage.getItem('devcafe_override_number');
+            const overrideNumber = globalSettings.override_number;
             if (overrideNumber) return overrideNumber;
 
             const today = new Date();
@@ -1108,7 +1133,7 @@
             let hours = weeklySchedule[dayName];
             
             const isOpen = (day >= 1 && day <= 4 && hour >= 8 && hour < 16);
-            const overrideNumber = localStorage.getItem('devcafe_override_number');
+            const overrideNumber = globalSettings.override_number;
             const displayElement = document.getElementById("dynamic-schedule");
             
             if (overrideNumber) {
