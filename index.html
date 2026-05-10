@@ -673,7 +673,7 @@
     </div>
 
     <header>
-        <h1 onclick="handleTitleClick()" style="cursor: pointer;" title="Tap 5 times to set shift override">DevCafe <span>Menu</span></h1>
+        <h1>DevCafe <span>Menu</span></h1>
         <p class="location">Bilik Bacaan FSKTM Lvl 1</p>
         
         <div class="opening-hours">
@@ -805,68 +805,20 @@
             "Saturday":  "Closed"
         };
 
-        // --- ADMIN / OVERRIDE ---
-        let globalSettings = { override_number: null };
-
-        async function fetchSettings() {
-            try {
-                const response = await fetch('settings.php');
-                const data = await response.json();
-                globalSettings.override_number = data.override_number;
-                updateSchedule();
-            } catch (e) {
-                console.error("Failed to load global settings:", e);
-            }
-        }
-
-        // Fetch initially and check every 10 seconds
-        fetchSettings();
-        setInterval(fetchSettings, 10000);
-
-        let titleClickCount = 0;
-        let titleClickTimer;
-
-        async function handleTitleClick() {
-            titleClickCount++;
-            clearTimeout(titleClickTimer);
-            
-            if (titleClickCount >= 5) {
-                titleClickCount = 0;
-                const currentOverride = globalSettings.override_number || '';
-                const newNumber = prompt("Admin: Enter override WhatsApp number (include country code, e.g., 60123456789). Leave empty to clear.", currentOverride);
-                
-                if (newNumber !== null) {
-                    const valToSave = newNumber.trim() === '' ? null : newNumber.trim();
-                    try {
-                        const response = await fetch('settings.php', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ override_number: valToSave })
-                        });
-                        const data = await response.json();
-                        if (data.success) {
-                            globalSettings.override_number = data.override_number;
-                            alert(valToSave ? "Global override set to: " + valToSave : "Global override cleared. Using default schedule.");
-                            updateSchedule();
-                        }
-                    } catch (e) {
-                        alert("Failed to save settings. Please ensure you are running on a PHP server.");
-                    }
-                }
-            } else {
-                titleClickTimer = setTimeout(() => {
-                    titleClickCount = 0;
-                }, 1000);
-            }
-        }
+        // ==========================================
+        // 🚨 MANUAL SHIFT OVERRIDE 🚨
+        // If you need to force the cafe to be "OPEN" and route all orders to a specific number,
+        // put that number inside the quotes below (e.g., "60123456789"). 
+        // To use the normal schedule, leave it completely empty: ""
+        const MANUAL_OVERRIDE_NUMBER = ""; 
+        // ==========================================
 
         // --- CART LOGIC ---
         let cart = {};
         let toastTimeout;
 
         function getDutyNumber() {
-            const overrideNumber = globalSettings.override_number;
-            if (overrideNumber) return overrideNumber;
+            if (MANUAL_OVERRIDE_NUMBER) return MANUAL_OVERRIDE_NUMBER;
 
             const today = new Date();
             const day = today.getDay(); 
@@ -1133,10 +1085,9 @@
             let hours = weeklySchedule[dayName];
             
             const isOpen = (day >= 1 && day <= 4 && hour >= 8 && hour < 16);
-            const overrideNumber = globalSettings.override_number;
             const displayElement = document.getElementById("dynamic-schedule");
             
-            if (overrideNumber) {
+            if (MANUAL_OVERRIDE_NUMBER) {
                 displayElement.innerHTML = `${dayName} (${dateString}) &bull; <span style="color:var(--btn-color); font-weight: bold;">OPEN (Override Active)</span>`;
                 return;
             }
