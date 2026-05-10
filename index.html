@@ -266,7 +266,7 @@
             left: 0;
             right: 0;
             background: var(--card-bg);
-            box-shadow: 0 -5px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 -10px 40px rgba(211, 124, 77, 0.25);
             padding: 20px 30px;
             display: flex;
             justify-content: space-between;
@@ -276,6 +276,7 @@
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border-top-left-radius: 30px;
             border-top-right-radius: 30px;
+            border-top: 4px solid var(--accent);
         }
 
         .cart-bar.active {
@@ -322,11 +323,19 @@
             cursor: pointer;
             box-shadow: 0 8px 20px rgba(56, 176, 0, 0.3);
             transition: all 0.3s ease;
+            animation: checkoutPulse 2s infinite;
+        }
+
+        @keyframes checkoutPulse {
+            0% { box-shadow: 0 0 0 0 rgba(56, 176, 0, 0.5); }
+            70% { box-shadow: 0 0 0 15px rgba(56, 176, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(56, 176, 0, 0); }
         }
 
         .checkout-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 12px 25px rgba(56, 176, 0, 0.4);
+            animation: none;
         }
 
         .checkout-btn:active {
@@ -664,7 +673,7 @@
     </div>
 
     <header>
-        <h1>DevCafe <span>Menu</span></h1>
+        <h1 onclick="handleTitleClick()" style="cursor: pointer;" title="Tap 5 times to set shift override">DevCafe <span>Menu</span></h1>
         <p class="location">Bilik Bacaan FSKTM Lvl 1</p>
         
         <div class="opening-hours">
@@ -796,11 +805,44 @@
             "Saturday":  "Closed"
         };
 
+        // --- ADMIN / OVERRIDE ---
+        let titleClickCount = 0;
+        let titleClickTimer;
+
+        function handleTitleClick() {
+            titleClickCount++;
+            clearTimeout(titleClickTimer);
+            
+            if (titleClickCount >= 5) {
+                titleClickCount = 0;
+                const currentOverride = localStorage.getItem('devcafe_override_number') || '';
+                const newNumber = prompt("Admin: Enter override WhatsApp number (include country code, e.g., 60123456789). Leave empty to clear.", currentOverride);
+                
+                if (newNumber !== null) {
+                    if (newNumber.trim() === '') {
+                        localStorage.removeItem('devcafe_override_number');
+                        alert("Override cleared. Using default schedule.");
+                    } else {
+                        localStorage.setItem('devcafe_override_number', newNumber.trim());
+                        alert("Override set to: " + newNumber.trim());
+                    }
+                    updateSchedule();
+                }
+            } else {
+                titleClickTimer = setTimeout(() => {
+                    titleClickCount = 0;
+                }, 1000);
+            }
+        }
+
         // --- CART LOGIC ---
         let cart = {};
         let toastTimeout;
 
         function getDutyNumber() {
+            const overrideNumber = localStorage.getItem('devcafe_override_number');
+            if (overrideNumber) return overrideNumber;
+
             const today = new Date();
             const day = today.getDay(); 
             const hour = today.getHours();
@@ -809,13 +851,12 @@
             const numB = "60163605017";
             const numC = "601151255671";
 
-            // ALLOW ALL FOR TESTING (Temporary logic based on user test)
-            if (true) { 
+            // Check if within operating hours (Mon-Thu, 8 AM - 4 PM)
+            if (day >= 1 && day <= 4 && hour >= 8 && hour < 16) {
                 if (day === 1) return (hour < 12) ? numA : numB;
                 if (day === 2) return (hour < 12) ? numB : numA;
                 if (day === 3) return numC;
                 if (day === 4) return (hour < 12) ? numA : numB;
-                return numA;
             }
             return null;
         }
@@ -1066,18 +1107,23 @@
             const day = today.getDay(); 
             let hours = weeklySchedule[dayName];
             
-            if (day >= 1 && day <= 4 && hour >= 8 && hour < 16) {
-                // it's open
-            } else {
-                hours = "8:00 AM - 4:00 PM"; // For testing
-            }
-
+            const isOpen = (day >= 1 && day <= 4 && hour >= 8 && hour < 16);
+            const overrideNumber = localStorage.getItem('devcafe_override_number');
             const displayElement = document.getElementById("dynamic-schedule");
             
-            if (hours === "Closed") {
-                displayElement.innerHTML = `${dayName} (${dateString}) &bull; <span style="color:var(--price-hot)">CLOSED</span>`;
+            if (overrideNumber) {
+                displayElement.innerHTML = `${dayName} (${dateString}) &bull; <span style="color:var(--btn-color); font-weight: bold;">OPEN (Override Active)</span>`;
+                return;
+            }
+            
+            if (!isOpen || hours === "Closed") {
+                if (hours === "Closed") {
+                    displayElement.innerHTML = `${dayName} (${dateString}) &bull; <span style="color:var(--price-hot); font-weight: bold;">CLOSED</span>`;
+                } else {
+                    displayElement.innerHTML = `${dayName} (${dateString}) &bull; <span style="color:var(--price-hot); font-weight: bold;">CLOSED</span> (Hours: ${hours})`;
+                }
             } else {
-                displayElement.innerHTML = `${dayName} (${dateString}) &bull; ${hours}`;
+                displayElement.innerHTML = `${dayName} (${dateString}) &bull; ${hours} <span style="color:var(--btn-color); font-weight: bold; margin-left: 5px;">(Open)</span>`;
             }
         }
 
