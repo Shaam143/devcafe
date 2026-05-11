@@ -936,8 +936,8 @@
 
             // Check if within operating hours (Mon-Thu, 8 AM - 4 PM)
             if (day >= 1 && day <= 4 && hour >= 8 && hour < 16) {
-                if (day === 1) return numA; // This week: numA covers all day (No numB)
-                if (day === 2) return numA; // This week: numA covers all day (No numB)
+                if (day === 1) return numB; // This week: numA covers all day (No numB)
+                if (day === 2) return numB; // This week: numA covers all day (No numB)
                 if (day === 3) return numC;
                 if (day === 4) return (hour < 12) ? numA : numB;
             }
