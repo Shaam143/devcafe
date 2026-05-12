@@ -717,6 +717,109 @@
             animation-delay: 0.3s;
         }
 
+        /* New Badge & Promo Banner */
+        .new-badge {
+            background: var(--btn-gradient);
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            vertical-align: middle;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(56, 176, 0, 0.3);
+        }
+
+        .promo-banner {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(211, 124, 77, 0.2);
+            border-radius: 20px;
+            padding: 15px 20px;
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+            animation: slideUpFade 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .promo-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .promo-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.1));
+        }
+
+        .promo-text b {
+            display: block;
+            color: var(--accent);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 2px;
+        }
+
+        .promo-text p {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .close-promo {
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .close-promo:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--text-main);
+        }
+
+        .price-tag.empty {
+            background: #f0f0f0;
+            color: #ccc;
+            cursor: not-allowed;
+            pointer-events: none;
+            box-shadow: none;
+            font-size: 0.8rem;
+        }
+
         @media (max-width: 480px) {
             h1 {
                 font-size: 2.8rem;
@@ -761,6 +864,18 @@
 </head>
 
 <body>
+
+    <div id="promo-banner" class="promo-banner">
+        <div class="promo-content">
+            <div class="promo-icon">🧊</div>
+            <div class="promo-text">
+                <b>New Addition</b>
+                <p>Iced Spanish Latte is here! ✨</p>
+            </div>
+        </div>
+        <button class="close-promo" onclick="closePromo()">✕</button>
+    </div>
+
 
     <div id="toast" class="toast">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#43E660" stroke-width="3"
@@ -872,8 +987,9 @@
                     { name: "Cappuccino", hot: "7", cold: "8" },
                     { name: "Mocha", hot: "8", cold: "9" },
                     { name: "Caramel Latte", hot: "8", cold: "9" },
-                    { name: "Spanish Latte", hot: "8", cold: "9" },
+                    { name: "Spanish Latte", hot: "", cold: "10", isNew: true },
                     { name: "Biscoff Latte", hot: "10", cold: "11" }
+
                 ]
             },
             {
@@ -1146,11 +1262,21 @@
 
                 section.items.forEach(item => {
                     let pricesHtml = '';
+                    const badge = item.isNew ? '<span class="new-badge">NEW</span>' : '';
+
                     if (section.hasHotCold) {
+                        const hotBtn = item.hot
+                            ? `<span class="price-tag hot" onclick="addToCart('${item.name}', 'Hot', ${item.hot})" title="Add Hot ${item.name}">RM ${item.hot}</span>`
+                            : `<span class="price-tag empty">-</span>`;
+
+                        const coldBtn = item.cold
+                            ? `<span class="price-tag cold" onclick="addToCart('${item.name}', 'Cold', ${item.cold})" title="Add Cold ${item.name}">RM ${item.cold}</span>`
+                            : `<span class="price-tag empty">-</span>`;
+
                         pricesHtml = `
                             <div class="prices">
-                                <span class="price-tag hot" onclick="addToCart('${item.name}', 'Hot', ${item.hot})" title="Add Hot ${item.name}">RM ${item.hot}</span>
-                                <span class="price-tag cold" onclick="addToCart('${item.name}', 'Cold', ${item.cold})" title="Add Cold ${item.name}">RM ${item.cold}</span>
+                                ${hotBtn}
+                                ${coldBtn}
                             </div>
                         `;
                     } else {
@@ -1163,11 +1289,12 @@
 
                     sectionHtml += `
                         <article class="menu-item">
-                            <h3 class="item-name">${item.name}</h3>
+                            <h3 class="item-name">${item.name}${badge}</h3>
                             ${pricesHtml}
                         </article>
                     `;
                 });
+
 
                 sectionHtml += `</section>`;
                 htmlContent += sectionHtml;
@@ -1209,7 +1336,16 @@
             }
         }
 
+        function closePromo() {
+            const banner = document.getElementById('promo-banner');
+            banner.style.opacity = '0';
+            banner.style.transform = 'translateX(-50%) translateY(20px)';
+            banner.style.transition = 'all 0.4s ease';
+            setTimeout(() => banner.remove(), 400);
+        }
+
         // Initialize
+
         document.addEventListener('DOMContentLoaded', () => {
             renderMenu();
             updateSchedule();
